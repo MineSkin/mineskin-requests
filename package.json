@@ -10,6 +10,11 @@
   "scripts": {
     "build": "yarn tsc"
   },
+  "author": {
+    "name": "Haylee Schäfer",
+    "email": "haylee@inventivetalent.org",
+    "url": "https://inventivetalent.org"
+  },
   "dependencies": {
     "@inventivetalent/axios-rate-limit": "^1.3.5",
     "@inventivetalent/time": "^1.0.3",

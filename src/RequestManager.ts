@@ -15,7 +15,7 @@ axios.defaults.headers["Content-Type"] = "application/json";
 axios.defaults.headers["Accept"] = "application/json";
 axios.defaults.timeout = TIMEOUT;
 
-export class Requests {
+export class RequestManager {
 
     static readonly axiosInstance: AxiosInstance = axios.create({});
 
