@@ -1,2 +1,2 @@
-export * from "./Requests";
+export * from "./RequestManager";
 export * from "./RequestConfig";
