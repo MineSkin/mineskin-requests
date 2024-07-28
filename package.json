@@ -10,6 +10,7 @@
   "scripts": {
     "build": "yarn tsc"
   },
+  "repository": "https://github.com/MineSkin/mineskin-requests.git",
   "author": {
     "name": "Haylee Schäfer",
     "email": "haylee@inventivetalent.org",
