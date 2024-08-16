@@ -8,7 +8,8 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "yarn tsc"
+    "build": "yarn tsc",
+    "test": "echo \"no test specified\" && exit 0"
   },
   "repository": "https://github.com/MineSkin/mineskin-requests.git",
   "author": {
