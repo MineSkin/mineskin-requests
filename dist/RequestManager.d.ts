@@ -3,6 +3,7 @@ import { rateLimitOptions } from "axios-rate-limit";
 import { RequestConfig, RequestKey } from "./RequestConfig";
 export declare const GENERIC = "generic";
 export declare class RequestManager {
+    static IPS: string[];
     static readonly axiosInstance: AxiosInstance;
     protected static readonly defaultRateLimit: rateLimitOptions;
     private static instances;

@@ -7,6 +7,9 @@ export interface RequestConfig<K extends RequestKey> {
         interval: number;
         maxPerRun: number;
     };
+    ip?: {
+        bind?: string;
+    };
     rateLimit?: rateLimitOptions;
     request: AxiosRequestConfig;
 }

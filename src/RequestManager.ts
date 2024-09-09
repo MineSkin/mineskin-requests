@@ -3,6 +3,8 @@ import { JobQueue } from "jobqu";
 import rateLimit, { RateLimitedAxiosInstance, rateLimitOptions } from "axios-rate-limit";
 import { Time } from "@inventivetalent/time";
 import { RequestConfig, RequestKey } from "./RequestConfig";
+import { networkInterfaces } from "os";
+import * as https from "node:https";
 
 
 export const GENERIC = "generic";
@@ -17,6 +19,8 @@ axios.defaults.timeout = TIMEOUT;
 
 export class RequestManager {
 
+    public static IPS: string[] = [];
+
     static readonly axiosInstance: AxiosInstance = axios.create({});
 
     protected static readonly defaultRateLimit: rateLimitOptions = {
@@ -28,6 +32,18 @@ export class RequestManager {
     private static queues: Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>> = new Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>>();
 
     static init() {
+        const interfaces = networkInterfaces();
+        for (let id in interfaces) {
+            const iface = interfaces[id];
+            for (let address of iface) {
+                if (address.internal) {
+                    continue;
+                }
+                console.info(`${ address.family } ${ address.address } ${ address.mac }`);
+                this.IPS.push(address.address);
+            }
+        }
+
         this.setupInstance(GENERIC, {});
         this.setupQueue(GENERIC, Time.millis(100), 1);
     }
@@ -41,6 +57,19 @@ export class RequestManager {
         if (this.queues.has(key)) {
             console.warn(`Queue with key ${ key } already exists!`);
             return;
+        }
+
+        if (config?.ip?.bind) {
+            const bind = config.ip.bind;
+            if (!this.IPS.includes(bind)) {
+                console.warn(`IP ${ bind } not found on this machine`);
+            } else {
+                console.info(`Binding ${ key } to IP ${ bind }`);
+                config.request.httpsAgent = new https.Agent({
+                    localAddress: config.ip.bind,
+                    family: config.ip.bind.includes(":") ? 6 : 4
+                });
+            }
         }
 
         if (config.rateLimit) {
