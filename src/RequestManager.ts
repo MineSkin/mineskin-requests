@@ -6,6 +6,7 @@ import { RequestConfig, RequestKey } from "./RequestConfig";
 import { networkInterfaces } from "os";
 import * as https from "node:https";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import { Breadcrumb } from "@mineskin/types";
 
 
 export const GENERIC = "generic";
@@ -120,21 +121,28 @@ export class RequestManager {
             throw new Error("No instance found for key " + inst);
         }
 
-        console.log(`=> ${ request.method } ${ request.url }`)
+        let breadcrumb = request.headers["X-MineSkin-Breadcrumb"] || "00000000";
+        console.log(`${ breadcrumb } => ${ request.method } ${ request.url }`)
 
         return instance.request(request);
     }
 
-    public static async dynamicRequest<K extends RequestKey>(key: K, request: AxiosRequestConfig): Promise<AxiosResponse> {
+    public static async dynamicRequest<K extends RequestKey>(key: K, request: AxiosRequestConfig, breadcrumb?: Breadcrumb): Promise<AxiosResponse> {
         const k = this.mapKey(key);
         const q = this.queues.get(k);
+
+        if (breadcrumb) {
+            request.headers = request.headers || {};
+            request.headers["X-MineSkin-Breadcrumb"] = breadcrumb;
+        }
+
         if (!q) {
             return this.runAxiosRequest(request, k);
             //throw new Error("No queue found for key " + k);
         }
 
         if (q.size > MAX_QUEUE_SIZE) {
-            console.warn(`Rejecting new request as queue for ${ k } is full (${ q.size })! `);
+            console.warn(`${ breadcrumb } Rejecting new request as queue for ${ k } is full (${ q.size })! `);
             throw new Error("Request queue is full!");
         }
         return await q.add(request);

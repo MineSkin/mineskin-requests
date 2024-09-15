@@ -83,7 +83,6 @@ class RequestManager {
         }
         if (config.proxy) {
             console.info(`Setting up proxy for ${key} via ${config.proxy.host}`);
-            console.log(config.proxy);
             config.request.httpsAgent = new https_proxy_agent_1.HttpsProxyAgent(config.proxy);
         }
         if (config.rateLimit) {
@@ -123,18 +122,23 @@ class RequestManager {
         if (!instance) {
             throw new Error("No instance found for key " + inst);
         }
-        console.log(`=> ${request.method} ${request.url}`);
+        let breadcrumb = request.headers["X-MineSkin-Breadcrumb"] || "00000000";
+        console.log(`${breadcrumb} => ${request.method} ${request.url}`);
         return instance.request(request);
     }
-    static async dynamicRequest(key, request) {
+    static async dynamicRequest(key, request, breadcrumb) {
         const k = this.mapKey(key);
         const q = this.queues.get(k);
+        if (breadcrumb) {
+            request.headers = request.headers || {};
+            request.headers["X-MineSkin-Breadcrumb"] = breadcrumb;
+        }
         if (!q) {
             return this.runAxiosRequest(request, k);
             //throw new Error("No queue found for key " + k);
         }
         if (q.size > MAX_QUEUE_SIZE) {
-            console.warn(`Rejecting new request as queue for ${k} is full (${q.size})! `);
+            console.warn(`${breadcrumb} Rejecting new request as queue for ${k} is full (${q.size})! `);
             throw new Error("Request queue is full!");
         }
         return await q.add(request);
