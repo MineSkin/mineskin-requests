@@ -5,7 +5,7 @@ import { Time } from "@inventivetalent/time";
 import { RequestConfig, RequestKey } from "./RequestConfig";
 import { networkInterfaces } from "os";
 import * as https from "node:https";
-import { ProxyAgent } from "proxy-agent";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 
 export const GENERIC = "generic";
@@ -74,8 +74,8 @@ export class RequestManager {
         }
 
         if (config.proxy) {
-            console.info(`Setting up proxy for ${ key }`);
-            config.request.httpsAgent = new ProxyAgent(config.proxy)
+            console.info(`Setting up proxy for ${ key } via ${ config.proxy.host }`);
+            config.request.httpsAgent = new HttpsProxyAgent(config.proxy)
         }
 
         if (config.rateLimit) {
@@ -129,7 +129,8 @@ export class RequestManager {
         const k = this.mapKey(key);
         const q = this.queues.get(k);
         if (!q) {
-            throw new Error("No queue found for key " + k);
+            return this.runAxiosRequest(request, k);
+            //throw new Error("No queue found for key " + k);
         }
 
         if (q.size > MAX_QUEUE_SIZE) {

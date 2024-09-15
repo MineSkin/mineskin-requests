@@ -1,18 +1,19 @@
 import { rateLimitOptions } from "axios-rate-limit";
 import { AxiosRequestConfig } from "axios";
-import { ProxyAgentOptions } from "proxy-agent";
+import { HttpsProxyAgentOptions } from "https-proxy-agent";
 
-export type RequestKey = string|any;
+export type RequestKey = string | any;
+
 export interface RequestConfig<K extends RequestKey> {
     key: K;
-    queue?:{
+    queue?: {
         interval: number;
         maxPerRun: number;
     };
     ip?: {
         bind?: string;
     };
-    proxy?: ProxyAgentOptions;
-    rateLimit?:rateLimitOptions;
+    proxy?: HttpsProxyAgentOptions;
+    rateLimit?: rateLimitOptions;
     request: AxiosRequestConfig;
 }

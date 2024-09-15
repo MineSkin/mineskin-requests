@@ -1,6 +1,6 @@
 import { rateLimitOptions } from "axios-rate-limit";
 import { AxiosRequestConfig } from "axios";
-import { ProxyAgentOptions } from "proxy-agent";
+import { HttpsProxyAgentOptions } from "https-proxy-agent";
 export type RequestKey = string | any;
 export interface RequestConfig<K extends RequestKey> {
     key: K;
@@ -11,7 +11,7 @@ export interface RequestConfig<K extends RequestKey> {
     ip?: {
         bind?: string;
     };
-    proxy?: ProxyAgentOptions;
+    proxy?: HttpsProxyAgentOptions;
     rateLimit?: rateLimitOptions;
     request: AxiosRequestConfig;
 }

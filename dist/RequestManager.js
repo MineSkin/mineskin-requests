@@ -33,7 +33,7 @@ const axios_rate_limit_1 = __importDefault(require("axios-rate-limit"));
 const time_1 = require("@inventivetalent/time");
 const os_1 = require("os");
 const https = __importStar(require("node:https"));
-const proxy_agent_1 = require("proxy-agent");
+const https_proxy_agent_1 = require("https-proxy-agent");
 exports.GENERIC = "generic";
 const MAX_QUEUE_SIZE = 100;
 const TIMEOUT = 10000;
@@ -82,8 +82,9 @@ class RequestManager {
             }
         }
         if (config.proxy) {
-            console.info(`Setting up proxy for ${key}`);
-            config.request.httpsAgent = new proxy_agent_1.ProxyAgent(config.proxy);
+            console.info(`Setting up proxy for ${key} via ${config.proxy.host}`);
+            console.log(config.proxy);
+            config.request.httpsAgent = new https_proxy_agent_1.HttpsProxyAgent(config.proxy);
         }
         if (config.rateLimit) {
             this.setupInstance(key, config.request, c => (0, axios_rate_limit_1.default)(axios_1.default.create(c), config.rateLimit));
@@ -129,7 +130,8 @@ class RequestManager {
         const k = this.mapKey(key);
         const q = this.queues.get(k);
         if (!q) {
-            throw new Error("No queue found for key " + k);
+            return this.runAxiosRequest(request, k);
+            //throw new Error("No queue found for key " + k);
         }
         if (q.size > MAX_QUEUE_SIZE) {
             console.warn(`Rejecting new request as queue for ${k} is full (${q.size})! `);
