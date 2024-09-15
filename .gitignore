@@ -20,3 +20,4 @@
 !.env.vault
 # Sentry Config File
 .sentryclirc
+/.jest/setEnvVars.js
