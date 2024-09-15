@@ -33,6 +33,7 @@ const axios_rate_limit_1 = __importDefault(require("axios-rate-limit"));
 const time_1 = require("@inventivetalent/time");
 const os_1 = require("os");
 const https = __importStar(require("node:https"));
+const proxy_agent_1 = require("proxy-agent");
 exports.GENERIC = "generic";
 const MAX_QUEUE_SIZE = 100;
 const TIMEOUT = 10000;
@@ -79,6 +80,10 @@ class RequestManager {
                     family: config.ip.bind.includes(":") ? 6 : 4
                 });
             }
+        }
+        if (config.proxy) {
+            console.info(`Setting up proxy for ${key}`);
+            config.request.httpsAgent = new proxy_agent_1.ProxyAgent(config.proxy);
         }
         if (config.rateLimit) {
             this.setupInstance(key, config.request, c => (0, axios_rate_limit_1.default)(axios_1.default.create(c), config.rateLimit));

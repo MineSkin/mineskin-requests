@@ -1,10 +1,11 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { JobQueue } from "jobqu";
-import rateLimit, { RateLimitedAxiosInstance, rateLimitOptions } from "axios-rate-limit";
+import rateLimit, { rateLimitOptions } from "axios-rate-limit";
 import { Time } from "@inventivetalent/time";
 import { RequestConfig, RequestKey } from "./RequestConfig";
 import { networkInterfaces } from "os";
 import * as https from "node:https";
+import { ProxyAgent } from "proxy-agent";
 
 
 export const GENERIC = "generic";
@@ -70,6 +71,11 @@ export class RequestManager {
                     family: config.ip.bind.includes(":") ? 6 : 4
                 });
             }
+        }
+
+        if (config.proxy) {
+            console.info(`Setting up proxy for ${ key }`);
+            config.request.httpsAgent = new ProxyAgent(config.proxy)
         }
 
         if (config.rateLimit) {

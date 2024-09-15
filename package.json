@@ -30,7 +30,8 @@
     "axios": "^1.7.2",
     "axios-rate-limit": "^1.4.0",
     "dotenv": "^16.4.5",
-    "jobqu": "^2.0.5"
+    "jobqu": "^2.0.5",
+    "proxy-agent": "^6.4.0"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
