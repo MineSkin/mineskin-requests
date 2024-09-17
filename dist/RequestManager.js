@@ -112,6 +112,7 @@ class RequestManager {
         console.log("set up request queue " + key);
     }
     static async runAxiosRequest(request, inst = this.axiosInstance) {
+        var _a;
         let instance;
         if (typeof inst === "string") {
             instance = this.instances.get(inst);
@@ -122,7 +123,7 @@ class RequestManager {
         if (!instance) {
             throw new Error("No instance found for key " + inst);
         }
-        let breadcrumb = request.headers["X-MineSkin-Breadcrumb"] || "00000000";
+        let breadcrumb = ((_a = request.headers) === null || _a === void 0 ? void 0 : _a["X-MineSkin-Breadcrumb"]) || "00000000";
         console.log(`${breadcrumb} => ${request.method} ${request.url}`);
         return instance.request(request);
     }

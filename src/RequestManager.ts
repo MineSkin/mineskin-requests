@@ -121,7 +121,7 @@ export class RequestManager {
             throw new Error("No instance found for key " + inst);
         }
 
-        let breadcrumb = request.headers["X-MineSkin-Breadcrumb"] || "00000000";
+        let breadcrumb = request.headers?.["X-MineSkin-Breadcrumb"] || "00000000";
         console.log(`${ breadcrumb } => ${ request.method } ${ request.url }`)
 
         return instance.request(request);
