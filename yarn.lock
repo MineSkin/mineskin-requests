@@ -785,8 +785,8 @@ __metadata:
 
 "@mineskin/types@git+ssh://git@github.com/MineSkin/mineskin-types.git#skin2":
   version: 1.0.1
-  resolution: "@mineskin/types@git+ssh://git@github.com/MineSkin/mineskin-types.git#commit=61e24acc9f7eefb20d6351560a3d2590cd0b752f"
-  checksum: 10c0/ed29b1b524dbcc7873d56b8fde5f9d96c9d30feb1f6312152fc0f131034d0cae9455f570922195eb29127331abcd4d4a4e2a8ad4fea09c338c2e41ee6b16bfcc
+  resolution: "@mineskin/types@git+ssh://git@github.com/MineSkin/mineskin-types.git#commit=4f277712514bd4dd54090ae5c62c34382fca1477"
+  checksum: 10c0/56b57463c2f79938d48838072de2befac50db1a8a892b2b9e41ab228032c8d438af8ed21a50c5d8d6413bc88ddd3f99b3cc83699d6df641006a68a598f6e3223
   languageName: node
   linkType: hard
 
@@ -2240,8 +2240,8 @@ __metadata:
   linkType: hard
 
 "commit-and-tag-version@npm:^12.4.1":
-  version: 12.4.3
-  resolution: "commit-and-tag-version@npm:12.4.3"
+  version: 12.4.4
+  resolution: "commit-and-tag-version@npm:12.4.4"
   dependencies:
     chalk: "npm:^2.4.2"
     conventional-changelog: "npm:4.0.0"
@@ -2261,7 +2261,7 @@ __metadata:
     yargs: "npm:^17.7.2"
   bin:
     commit-and-tag-version: bin/cli.js
-  checksum: 10c0/e0edbcc940d3d61d32fffd195c0df756b3a80316e6b0dce119847a435b430439926c0bac6e7d4f5d3a7eac30121ca5f8d175e9ce6748b1ddca711193635e768c
+  checksum: 10c0/f5c888d341594780aa0c08d2f5e64fa39ebbc0580d925a281b08b69e607cf54a2c9322e822c1b9835f9551ed08eb4b166b9cbb0e9376995474910b561779795d
   languageName: node
   linkType: hard
 
@@ -2697,9 +2697,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.4":
-  version: 1.5.23
-  resolution: "electron-to-chromium@npm:1.5.23"
-  checksum: 10c0/a2f76d3ffae24635ff13597a7e4ddd73bd7ee2124e021d34a60faafc5a1afda567e6d26c0c84abc5c2d7622d9daf9bb25ed7dd2970019dcf4b9a28c02c13cab4
+  version: 1.5.25
+  resolution: "electron-to-chromium@npm:1.5.25"
+  checksum: 10c0/2ea818d22592754b902df70d48b82c5d9e3cc2a221d3d0c39d7a7967780601a5cebd5fa10628c6d0ba918582c268a20392279e8bee93edba2e499681056ae143
   languageName: node
   linkType: hard
 
@@ -4606,8 +4606,8 @@ __metadata:
   linkType: hard
 
 "nodemon@npm:^3.1.2":
-  version: 3.1.4
-  resolution: "nodemon@npm:3.1.4"
+  version: 3.1.5
+  resolution: "nodemon@npm:3.1.5"
   dependencies:
     chokidar: "npm:^3.5.2"
     debug: "npm:^4"
@@ -4621,7 +4621,7 @@ __metadata:
     undefsafe: "npm:^2.0.5"
   bin:
     nodemon: bin/nodemon.js
-  checksum: 10c0/be2335396a4c25549f86e9c69bb57e6a21758a9649d74182a359d88b80afbe84f67a1651e293a08c6d77ecdf5c6224d02990de9de225f70d7c659021206c877f
+  checksum: 10c0/9282b6d1480e13aabd295b817a31f0d2345fb35de71e80caaaf0623ed7ec67fa2503429fe91e1f1979ecfba4d85d20183df5cbb1b87f36c273ff13686f819e6b
   languageName: node
   linkType: hard
 
@@ -4901,9 +4901,9 @@ __metadata:
   linkType: hard
 
 "pg-protocol@npm:*":
-  version: 1.6.1
-  resolution: "pg-protocol@npm:1.6.1"
-  checksum: 10c0/7eadef4010ac0a3925c460be7332ca4098a5c6d5181725a62193fcfa800000ae6632d98d814f3989b42cf5fdc3b45e34c714a1959d29174e81e30730e140ae5f
+  version: 1.7.0
+  resolution: "pg-protocol@npm:1.7.0"
+  checksum: 10c0/c4af854d9b843c808231c0040fed89f2b9101006157df8da2bb2f62a7dde702de748d852228dc22df41cc7ffddfb526af3bcb34b278b581e9f76a060789186c1
   languageName: node
   linkType: hard
 
