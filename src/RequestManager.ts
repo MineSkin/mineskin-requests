@@ -111,8 +111,10 @@ export class RequestManager {
 
     protected static async runAxiosRequest(request: AxiosRequestConfig, inst: AxiosInstance | string = this.axiosInstance): Promise<AxiosResponse> {
         let instance: AxiosInstance;
+        let instanceKey: string = "default";
         if (typeof inst === "string") {
             instance = this.instances.get(inst);
+            instanceKey = inst;
         } else {
             instance = inst as AxiosInstance;
         }
@@ -122,7 +124,7 @@ export class RequestManager {
         }
 
         let breadcrumb = request.headers?.["X-MineSkin-Breadcrumb"] || "00000000";
-        console.log(`${ breadcrumb } => ${ request.method } ${ request.url }`)
+        console.log(`${ breadcrumb } => ${ request.method } ${ request.url } via ${ instanceKey }`);
 
         return instance.request(request);
     }

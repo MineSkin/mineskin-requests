@@ -114,8 +114,10 @@ class RequestManager {
     static async runAxiosRequest(request, inst = this.axiosInstance) {
         var _a;
         let instance;
+        let instanceKey = "default";
         if (typeof inst === "string") {
             instance = this.instances.get(inst);
+            instanceKey = inst;
         }
         else {
             instance = inst;
@@ -124,7 +126,7 @@ class RequestManager {
             throw new Error("No instance found for key " + inst);
         }
         let breadcrumb = ((_a = request.headers) === null || _a === void 0 ? void 0 : _a["X-MineSkin-Breadcrumb"]) || "00000000";
-        console.log(`${breadcrumb} => ${request.method} ${request.url}`);
+        console.log(`${breadcrumb} => ${request.method} ${request.url} via ${instanceKey}`);
         return instance.request(request);
     }
     static async dynamicRequest(key, request, breadcrumb) {
