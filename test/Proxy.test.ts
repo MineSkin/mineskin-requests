@@ -10,7 +10,7 @@ describe('Proxy', () => {
         RequestManager.registerInstance({
             key: GENERIC + "proxy",
             request: {
-                baseURL: "https://api64.ipify.org",
+                baseURL: process.env.TEST_PROXY_URL || "https://api64.ipify.org",
             },
             proxy: {
                 host: process.env.TEST_PROXY_HOST || "localhost",
