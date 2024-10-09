@@ -7,9 +7,12 @@ import { networkInterfaces } from "os";
 import * as https from "node:https";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { Breadcrumb } from "@mineskin/types";
+import { Address4, Address6 } from "ip-address";
 
 
 export const GENERIC = "generic";
+
+const PUBLIC_IPV4_REGEX = /^([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(?<!172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31))(?<!127)(?<!^10)(?<!^0)\.([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(?<!192\.168)(?<!172\.(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31))\.([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/;
 
 const MAX_QUEUE_SIZE = 100;
 const TIMEOUT = 10000;
@@ -41,7 +44,30 @@ export class RequestManager {
                 if (address.internal) {
                     continue;
                 }
-                console.info(`${ address.family } ${ address.address } ${ address.mac }`);
+
+                if (address.family === "IPv4") {
+                    const addr = new Address4(address.address);
+                    if (!addr.isCorrect()) {
+                        continue;
+                    }
+                    if (!PUBLIC_IPV4_REGEX.test(address.address)) {
+                        continue;
+                    }
+                }
+                if (address.family === "IPv6") {
+                    const addr = new Address6(address.address);
+                    if (!addr.isCorrect()) {
+                        continue;
+                    }
+                    if (addr.isLinkLocal() || addr.isLoopback()) {
+                        continue;
+                    }
+                    if (addr.getScope() !== 'Global') {
+                        continue;
+                    }
+                }
+
+                console.info(`${ address.family } ${ address.address } ${ address.netmask } ${ address.mac } ${ address.cidr }`);
                 this.IPS.push(address.address);
             }
         }
