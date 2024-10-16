@@ -35,6 +35,7 @@ const os_1 = require("os");
 const https = __importStar(require("node:https"));
 const https_proxy_agent_1 = require("https-proxy-agent");
 const util_1 = require("./util");
+const Sentry = __importStar(require("@sentry/node"));
 exports.GENERIC = "generic";
 const MAX_QUEUE_SIZE = 100;
 const TIMEOUT = 10000;
@@ -87,7 +88,7 @@ class RequestManager {
             config.request.httpsAgent = new https_proxy_agent_1.HttpsProxyAgent(config.proxy);
         }
         if (config.rateLimit) {
-            this.setupInstance(key, config.request, c => (0, axios_rate_limit_1.default)(axios_1.default.create(c), config.rateLimit));
+            this.setupInstance(key, config.request, c => (0, axios_rate_limit_1.default)(this.createAxiosInstance(c), config.rateLimit));
         }
         else {
             this.setupInstance(key, config.request);
@@ -102,8 +103,28 @@ class RequestManager {
         }
         return JSON.stringify(key);
     }
-    static setupInstance(key, config, constr = (c) => axios_1.default.create(c)) {
-        this.instances.set(key, axios_1.default.create(config));
+    static createAxiosInstance(config) {
+        const instance = axios_1.default.create(config);
+        instance.interceptors.response.use((response) => response, (error) => {
+            var _a, _b, _c, _d, _e, _f, _g;
+            const is429 = ((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) === 429;
+            console.error(`Error in Axios API, status ${(_b = error.response) === null || _b === void 0 ? void 0 : _b.status} ${is429 ? "(429)" : ""}`);
+            console.error((_c = error.config) === null || _c === void 0 ? void 0 : _c.url);
+            console.error(JSON.stringify(((_d = error.response) === null || _d === void 0 ? void 0 : _d.data) || error.response, null, 2));
+            console.error(JSON.stringify((_e = error.request) === null || _e === void 0 ? void 0 : _e.data, null, 2));
+            Sentry.captureException(error, {
+                level: is429 ? 'fatal' : 'error',
+                extra: {
+                    responseCode: (_f = error.response) === null || _f === void 0 ? void 0 : _f.status,
+                    endpoint: (_g = error.config) === null || _g === void 0 ? void 0 : _g.url
+                }
+            });
+            throw error;
+        });
+        return instance;
+    }
+    static setupInstance(key, config, constr = (c) => this.createAxiosInstance(c)) {
+        this.instances.set(key, constr(config));
         console.log("set up axios instance " + key);
     }
     static setupQueue(key, interval, maxPerRun) {
@@ -150,7 +171,7 @@ class RequestManager {
 }
 exports.RequestManager = RequestManager;
 RequestManager.IPS = [];
-RequestManager.axiosInstance = axios_1.default.create({});
+RequestManager.axiosInstance = RequestManager.createAxiosInstance({});
 RequestManager.defaultRateLimit = {
     maxRequests: 600,
     perMilliseconds: 10 * 60 * 1000

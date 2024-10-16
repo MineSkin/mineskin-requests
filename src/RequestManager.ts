@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, CreateAxiosDefaults } from "axios";
 import { JobQueue } from "jobqu";
 import rateLimit, { rateLimitOptions } from "axios-rate-limit";
 import { Time } from "@inventivetalent/time";
@@ -9,10 +9,9 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import { Breadcrumb } from "@mineskin/types";
 import { Address4, Address6 } from "ip-address";
 import { isPublicNetworkInterface } from "./util";
-
+import * as Sentry from "@sentry/node";
 
 export const GENERIC = "generic";
-
 
 
 const MAX_QUEUE_SIZE = 100;
@@ -27,7 +26,7 @@ export class RequestManager {
 
     public static IPS: string[] = [];
 
-    static readonly axiosInstance: AxiosInstance = axios.create({});
+    static readonly axiosInstance: AxiosInstance = RequestManager.createAxiosInstance({});
 
     protected static readonly defaultRateLimit: rateLimitOptions = {
         maxRequests: 600,
@@ -85,7 +84,7 @@ export class RequestManager {
         }
 
         if (config.rateLimit) {
-            this.setupInstance(key, config.request, c => rateLimit(axios.create(c), config.rateLimit));
+            this.setupInstance(key, config.request, c => rateLimit(this.createAxiosInstance(c), config.rateLimit));
         } else {
             this.setupInstance(key, config.request);
         }
@@ -102,8 +101,28 @@ export class RequestManager {
         return JSON.stringify(key);
     }
 
-    protected static setupInstance(key: string, config: AxiosRequestConfig, constr: AxiosConstructor = (c) => axios.create(c)) {
-        this.instances.set(key, axios.create(config));
+    protected static createAxiosInstance(config: CreateAxiosDefaults) {
+        const instance = axios.create(config);
+        instance.interceptors.response.use((response) => response, (error) => {
+            const is429 = error.response?.status === 429;
+            console.error(`Error in Axios API, status ${ error.response?.status } ${ is429 ? "(429)" : "" }`);
+            console.error(error.config?.url);
+            console.error(JSON.stringify(error.response?.data || error.response, null, 2));
+            console.error(JSON.stringify(error.request?.data, null, 2));
+            Sentry.captureException(error, {
+                level: is429 ? 'fatal' : 'error',
+                extra: {
+                    responseCode: error.response?.status,
+                    endpoint: error.config?.url
+                }
+            });
+            throw error;
+        });
+        return instance;
+    }
+
+    protected static setupInstance(key: string, config: AxiosRequestConfig, constr: AxiosConstructor = (c) => this.createAxiosInstance(c)) {
+        this.instances.set(key, constr(config));
         console.log("set up axios instance " + key);
     }
 
