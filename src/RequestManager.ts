@@ -105,10 +105,6 @@ export class RequestManager {
         const instance = axios.create(config);
         instance.interceptors.response.use((response) => response, (error) => {
             const is429 = error.response?.status === 429;
-            console.error(`Error in Axios API, status ${ error.response?.status } ${ is429 ? "(429)" : "" }`);
-            console.error(error.config?.url);
-            console.error(JSON.stringify(error.response?.data || error.response, null, 2));
-            console.error(JSON.stringify(error.request?.data, null, 2));
             Sentry.captureException(error, {
                 level: is429 ? 'fatal' : 'error',
                 extra: {
@@ -116,6 +112,11 @@ export class RequestManager {
                     endpoint: error.config?.url
                 }
             });
+            console.error(`Error in Axios API, status ${ error.response?.status } ${ is429 ? "(429)" : "" }`);
+            console.error(error.config?.url);
+            console.error(JSON.stringify(error.response?.data || error.response, null, 2));
+            console.error(JSON.stringify(error.response?.headers, null, 2));
+            console.error(JSON.stringify(error.request?.data, null, 2));
             throw error;
         });
         return instance;
