@@ -7,36 +7,52 @@ import { networkInterfaces } from "os";
 import * as https from "node:https";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { Breadcrumb } from "@mineskin/types";
-import { Address4, Address6 } from "ip-address";
 import { isPublicNetworkInterface } from "./util";
 import * as Sentry from "@sentry/node";
+import { IRequestExecutor } from "@mineskin/core";
+import { injectable } from "inversify";
 
 export const GENERIC = "generic";
-
 
 const MAX_QUEUE_SIZE = 100;
 const TIMEOUT = 10000;
 
-axios.defaults.headers["User-Agent"] = "MineSkin";
-axios.defaults.headers["Content-Type"] = "application/json";
-axios.defaults.headers["Accept"] = "application/json";
-axios.defaults.timeout = TIMEOUT;
+@injectable()
+export class RequestManager implements IRequestExecutor {
 
-export class RequestManager {
+    public static IPS: Set<string> = new Set<string>();
 
-    public static IPS: string[] = [];
-
-    static readonly axiosInstance: AxiosInstance = RequestManager.createAxiosInstance({});
+    readonly defaultInstance: AxiosInstance = this.createAxiosInstance({});
 
     protected static readonly defaultRateLimit: rateLimitOptions = {
         maxRequests: 600,
         perMilliseconds: 10 * 60 * 1000
     }
 
-    private static instances: Map<string, AxiosInstance> = new Map<string, AxiosInstance>();
-    private static queues: Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>> = new Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>>();
+    private readonly instances: Map<string, AxiosInstance> = new Map<string, AxiosInstance>();
+    private readonly queues: Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>> = new Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>>();
 
+    private static _instance: RequestManager;
+
+    /**@deprecated**/
+    static get instance(): RequestManager {
+        if (!this._instance) {
+            this._instance = new RequestManager();
+        }
+        return this._instance;
+    }
+
+    /**@deprecated**/
     static init() {
+        RequestManager.instance;
+    }
+
+    /**@deprecated**/
+    static get axiosInstance(): AxiosInstance {
+        return RequestManager.instance.defaultInstance;
+    }
+
+    constructor() {
         const interfaces = networkInterfaces();
         i: for (let id in interfaces) {
             const iface = interfaces[id];
@@ -46,7 +62,7 @@ export class RequestManager {
                 }
 
                 console.info(`${ address.family } ${ address.address } ${ address.netmask } ${ address.mac } ${ address.cidr }`);
-                this.IPS.push(address.address);
+                RequestManager.IPS.add(address.address);
             }
         }
 
@@ -54,7 +70,12 @@ export class RequestManager {
         this.setupQueue(GENERIC, Time.millis(100), 1);
     }
 
+    /**@deprecated**/
     static registerInstance<K extends RequestKey>(config: RequestConfig<K>) {
+        return RequestManager.instance.registerInstance(config);
+    }
+
+    registerInstance<K extends RequestKey>(config: RequestConfig<K>) {
         const key = this.mapKey(config.key);
         if (this.instances.has(key)) {
             console.warn(`Instance with key ${ key } already exists!`);
@@ -67,7 +88,7 @@ export class RequestManager {
 
         if (config?.ip?.bind) {
             const bind = config.ip.bind;
-            if (!this.IPS.includes(bind)) {
+            if (!RequestManager.IPS.has(bind)) {
                 console.warn(`IP ${ bind } not found on this machine`);
             } else {
                 console.info(`Binding ${ key } to IP ${ bind }`);
@@ -94,15 +115,24 @@ export class RequestManager {
         }
     }
 
-    private static mapKey(key: RequestKey): string {
+    protected mapKey(key: RequestKey): string {
         if (typeof key === "string") {
             return key;
         }
         return JSON.stringify(key);
     }
 
+    /**@deprecated**/
     protected static createAxiosInstance(config: CreateAxiosDefaults) {
+        return RequestManager.instance.createAxiosInstance(config);
+    }
+
+    protected createAxiosInstance(config: CreateAxiosDefaults): AxiosInstance {
         const instance = axios.create(config);
+        instance.defaults.headers["User-Agent"] = "MineSkin";
+        instance.defaults.headers["Content-Type"] = "application/json";
+        instance.defaults.headers["Accept"] = "application/json";
+        instance.defaults.timeout = TIMEOUT;
         instance.interceptors.response.use((response) => response, (error) => {
             const is429 = error.response?.status === 429;
             Sentry.captureException(error, {
@@ -122,19 +152,34 @@ export class RequestManager {
         return instance;
     }
 
-    protected static setupInstance(key: string, config: AxiosRequestConfig, constr: AxiosConstructor = (c) => this.createAxiosInstance(c)) {
+    /**@deprecated**/
+    protected static setupInstance(key: string, config: AxiosRequestConfig, constr: AxiosConstructor = (c) => RequestManager.createAxiosInstance(c)) {
+        return RequestManager.instance.setupInstance(key, config, constr);
+    }
+
+    protected setupInstance(key: string, config: AxiosRequestConfig, constr: AxiosConstructor = (c) => this.createAxiosInstance(c)) {
         this.instances.set(key, constr(config));
         console.log("set up axios instance " + key);
     }
 
-    private static setupQueue(key: string, interval: number, maxPerRun: number): void {
+    /**@deprecated**/
+    protected static setupQueue(key: string, interval: number, maxPerRun: number): void {
+        return RequestManager.instance.setupQueue(key, interval, maxPerRun);
+    }
+
+    protected setupQueue(key: string, interval: number, maxPerRun: number): void {
         this.queues.set(key, new JobQueue<AxiosRequestConfig, AxiosResponse>(request => {
             return this.runAxiosRequest(request, key);
         }, interval, maxPerRun));
         console.log("set up request queue " + key);
     }
 
-    protected static async runAxiosRequest(request: AxiosRequestConfig, inst: AxiosInstance | string = this.axiosInstance): Promise<AxiosResponse> {
+    /**@deprecated**/
+    protected static async runAxiosRequest(request: AxiosRequestConfig, inst: AxiosInstance | string = RequestManager.axiosInstance): Promise<AxiosResponse> {
+        return RequestManager.instance.runAxiosRequest(request, inst);
+    }
+
+    protected async runAxiosRequest(request: AxiosRequestConfig, inst: AxiosInstance | string = this.defaultInstance): Promise<AxiosResponse> {
         let instance: AxiosInstance;
         let instanceKey: string = "default";
         if (typeof inst === "string") {
@@ -154,7 +199,12 @@ export class RequestManager {
         return instance.request(request);
     }
 
+    /**@deprecated**/
     public static async dynamicRequest<K extends RequestKey>(key: K, request: AxiosRequestConfig, breadcrumb?: Breadcrumb): Promise<AxiosResponse> {
+        return RequestManager.instance.dynamicRequest(key, request, breadcrumb);
+    }
+
+    public async dynamicRequest<K extends RequestKey>(key: K, request: AxiosRequestConfig, breadcrumb?: Breadcrumb): Promise<AxiosResponse> {
         const k = this.mapKey(key);
         const q = this.queues.get(k);
 

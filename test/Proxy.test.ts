@@ -4,10 +4,12 @@ import * as process from "node:process";
 
 describe('Proxy', () => {
 
-    beforeAll(async () => {
-        RequestManager.init();
+    let requestManager: RequestManager;
 
-        RequestManager.registerInstance({
+    beforeAll(async () => {
+        requestManager = new RequestManager();
+
+        requestManager.registerInstance({
             key: GENERIC + "proxy",
             request: {
                 baseURL: process.env.TEST_PROXY_URL || "https://api64.ipify.org",
@@ -23,7 +25,7 @@ describe('Proxy', () => {
     describe('request()', () => {
         test('should make a request', async () => {
             try {
-                const response = await RequestManager.dynamicRequest(GENERIC + "proxy", {
+                const response = await requestManager.dynamicRequest(GENERIC + "proxy", {
                     method: "GET",
                     url: "/?format=json",
 
