@@ -7,7 +7,7 @@ describe('Proxy', () => {
     let requestManager: RequestManager;
 
     beforeAll(async () => {
-        requestManager = new RequestManager();
+        requestManager = new RequestManager(undefined, undefined);
 
         requestManager.registerInstance({
             key: GENERIC + "proxy",

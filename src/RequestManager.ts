@@ -10,7 +10,9 @@ import { Breadcrumb } from "@mineskin/types";
 import { isPublicNetworkInterface } from "./util";
 import * as Sentry from "@sentry/node";
 import { IRequestExecutor } from "@mineskin/core";
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
+import { ICredentialService, ILogProvider, IMetricsProvider, TYPES as CoreTypes } from "@mineskin/core";
+import winston from "winston";
 
 export const GENERIC = "generic";
 
@@ -34,10 +36,13 @@ export class RequestManager implements IRequestExecutor {
 
     private static _instance: RequestManager;
 
+    readonly logger: winston.Logger;
+
     /**@deprecated**/
     static get instance(): RequestManager {
         if (!this._instance) {
-            this._instance = new RequestManager();
+            console.trace("Creating new RequestManager instance");
+            this._instance = new RequestManager(undefined, undefined);
         }
         return this._instance;
     }
@@ -52,7 +57,19 @@ export class RequestManager implements IRequestExecutor {
         return RequestManager.instance.defaultInstance;
     }
 
-    constructor() {
+    constructor(
+        @inject(CoreTypes.LogProvider) readonly logProvider: ILogProvider | undefined,
+        @inject(CoreTypes.MetricsProvider) readonly metrics: IMetricsProvider | undefined,
+    ) {
+        if (!logProvider) {
+            console.warn("No log provider injected!");
+        } else {
+            this.logger = logProvider.l.child({label: "Requests"});
+        }
+        if (!metrics) {
+            console.warn("No metrics provider injected!");
+        }
+
         const interfaces = networkInterfaces();
         i: for (let id in interfaces) {
             const iface = interfaces[id];
