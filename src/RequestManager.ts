@@ -31,8 +31,8 @@ export class RequestManager implements IRequestExecutor {
         perMilliseconds: 10 * 60 * 1000
     }
 
-    private readonly instances: Map<string, AxiosInstance> = new Map<string, AxiosInstance>();
-    private readonly queues: Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>> = new Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>>();
+    protected readonly instances: Map<string, AxiosInstance> = new Map<string, AxiosInstance>();
+    protected readonly queues: Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>> = new Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>>();
 
     private static _instance: RequestManager;
 

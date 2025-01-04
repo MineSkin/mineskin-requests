@@ -1,4 +1,5 @@
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse, CreateAxiosDefaults } from "axios";
+import { JobQueue } from "jobqu";
 import { rateLimitOptions } from "axios-rate-limit";
 import { RequestConfig, RequestKey } from "./RequestConfig";
 import { Breadcrumb } from "@mineskin/types";
@@ -12,8 +13,8 @@ export declare class RequestManager implements IRequestExecutor {
     static IPS: Set<string>;
     readonly defaultInstance: AxiosInstance;
     protected static readonly defaultRateLimit: rateLimitOptions;
-    private readonly instances;
-    private readonly queues;
+    protected readonly instances: Map<string, AxiosInstance>;
+    protected readonly queues: Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>>;
     private static _instance;
     readonly logger: winston.Logger;
     /**@deprecated**/
