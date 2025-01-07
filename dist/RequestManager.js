@@ -213,9 +213,13 @@ let RequestManager = RequestManager_1 = class RequestManager {
         if (!instance) {
             throw new Error("No instance found for key " + inst);
         }
+        const start = Date.now();
         let breadcrumb = ((_a = request.headers) === null || _a === void 0 ? void 0 : _a["X-MineSkin-Breadcrumb"]) || "00000000";
-        (this.logger || console).debug(`${breadcrumb} => ${request.method || 'GET'} ${request.url} via ${instanceKey}`);
-        return instance.request(request);
+        (this.logger || console).debug(`${breadcrumb} ==> ${request.method || 'GET'} ${request.url} via ${instanceKey}`);
+        const response = await instance.request(request);
+        const end = Date.now();
+        (this.logger || console).debug(`${breadcrumb} <== ${request.method || 'GET'} ${request.url} (${response.status}) in ${end - start}ms`);
+        return response;
     }
     /**@deprecated**/
     static async dynamicRequest(key, request, breadcrumb) {
@@ -236,6 +240,7 @@ let RequestManager = RequestManager_1 = class RequestManager {
             (this.logger || console).warn(`${breadcrumb} Rejecting new request as queue for ${k} is full (${q.size})! `);
             throw new Error("Request queue is full!");
         }
+        (this.logger || console).debug(`${breadcrumb} ... ${request.method || 'GET'} ${request.url}`);
         return await q.add(request);
     }
 };

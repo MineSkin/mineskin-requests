@@ -210,10 +210,17 @@ export class RequestManager implements IRequestExecutor {
             throw new Error("No instance found for key " + inst);
         }
 
-        let breadcrumb = request.headers?.["X-MineSkin-Breadcrumb"] || "00000000";
-        (this.logger || console).debug(`${ breadcrumb } => ${ request.method || 'GET' } ${ request.url } via ${ instanceKey }`);
+        const start = Date.now();
 
-        return instance.request(request);
+        let breadcrumb = request.headers?.["X-MineSkin-Breadcrumb"] || "00000000";
+        (this.logger || console).debug(`${ breadcrumb } ==> ${ request.method || 'GET' } ${ request.url } via ${ instanceKey }`);
+
+        const response = await instance.request(request);
+        const end = Date.now();
+
+        (this.logger || console).debug(`${ breadcrumb } <== ${ request.method || 'GET' } ${ request.url } (${ response.status }) in ${ end - start }ms`);
+
+        return response;
     }
 
     /**@deprecated**/
@@ -239,6 +246,9 @@ export class RequestManager implements IRequestExecutor {
             (this.logger || console).warn(`${ breadcrumb } Rejecting new request as queue for ${ k } is full (${ q.size })! `);
             throw new Error("Request queue is full!");
         }
+
+        (this.logger || console).debug(`${ breadcrumb } ... ${ request.method || 'GET' } ${ request.url }`);
+
         return await q.add(request);
     }
 
