@@ -78,7 +78,7 @@ export class RequestManager implements IRequestExecutor {
                     continue i; // skip interface
                 }
 
-                console.info(`${ address.family } ${ address.address } ${ address.netmask } ${ address.mac } ${ address.cidr }`);
+                (this.logger || console).info(`${ address.family } ${ address.address } ${ address.netmask } ${ address.mac } ${ address.cidr }`);
                 RequestManager.IPS.add(address.address);
             }
         }
@@ -95,11 +95,11 @@ export class RequestManager implements IRequestExecutor {
     registerInstance<K extends RequestKey>(config: RequestConfig<K>) {
         const key = this.mapKey(config.key);
         if (this.instances.has(key)) {
-            console.warn(`Instance with key ${ key } already exists!`);
+            (this.logger || console).warn(`Instance with key ${ key } already exists!`);
             return;
         }
         if (this.queues.has(key)) {
-            console.warn(`Queue with key ${ key } already exists!`);
+            (this.logger || console).warn(`Queue with key ${ key } already exists!`);
             return;
         }
 
@@ -117,7 +117,7 @@ export class RequestManager implements IRequestExecutor {
         }
 
         if (config.proxy) {
-            console.info(`Setting up proxy for ${ key } via ${ config.proxy.host }`);
+            (this.logger || console).info(`Setting up proxy for ${ key } via ${ config.proxy.host }`);
             config.request.httpsAgent = new HttpsProxyAgent(config.proxy)
         }
 
@@ -159,11 +159,11 @@ export class RequestManager implements IRequestExecutor {
                     endpoint: error.config?.url
                 }
             });
-            console.error(`Error in Axios API, status ${ error.response?.status } ${ is429 ? "(429)" : "" }`);
-            console.error(error.config?.url);
-            console.error(JSON.stringify(error.response?.data || error.response, null, 2));
-            console.error(JSON.stringify(error.response?.headers, null, 2));
-            console.error(JSON.stringify(error.request?.data, null, 2));
+            (this.logger || console).error(`Error in Axios API, status ${ error.response?.status } ${ is429 ? "(429)" : "" }`);
+            (this.logger || console).error(error.config?.url);
+            (this.logger || console).error(JSON.stringify(error.response?.data || error.response, null, 2));
+            (this.logger || console).error(JSON.stringify(error.response?.headers, null, 2));
+            (this.logger || console).error(JSON.stringify(error.request?.data, null, 2));
             throw error;
         });
         return instance;
@@ -176,7 +176,7 @@ export class RequestManager implements IRequestExecutor {
 
     protected setupInstance(key: string, config: AxiosRequestConfig, constr: AxiosConstructor = (c) => this.createAxiosInstance(c)) {
         this.instances.set(key, constr(config));
-        console.log("set up axios instance " + key);
+        (this.logger || console).info("set up axios instance " + key);
     }
 
     /**@deprecated**/
@@ -188,7 +188,7 @@ export class RequestManager implements IRequestExecutor {
         this.queues.set(key, new JobQueue<AxiosRequestConfig, AxiosResponse>(request => {
             return this.runAxiosRequest(request, key);
         }, interval, maxPerRun));
-        console.log("set up request queue " + key);
+        (this.logger || console).info("set up request queue " + key);
     }
 
     /**@deprecated**/
@@ -211,7 +211,7 @@ export class RequestManager implements IRequestExecutor {
         }
 
         let breadcrumb = request.headers?.["X-MineSkin-Breadcrumb"] || "00000000";
-        console.log(`${ breadcrumb } => ${ request.method } ${ request.url } via ${ instanceKey }`);
+        (this.logger || console).debug(`${ breadcrumb } => ${ request.method || 'GET' } ${ request.url } via ${ instanceKey }`);
 
         return instance.request(request);
     }
@@ -236,7 +236,7 @@ export class RequestManager implements IRequestExecutor {
         }
 
         if (q.size > MAX_QUEUE_SIZE) {
-            console.warn(`${ breadcrumb } Rejecting new request as queue for ${ k } is full (${ q.size })! `);
+            (this.logger || console).warn(`${ breadcrumb } Rejecting new request as queue for ${ k } is full (${ q.size })! `);
             throw new Error("Request queue is full!");
         }
         return await q.add(request);

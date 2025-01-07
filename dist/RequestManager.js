@@ -93,7 +93,7 @@ let RequestManager = RequestManager_1 = class RequestManager {
                 if (!(0, util_1.isPublicNetworkInterface)(address)) {
                     continue i; // skip interface
                 }
-                console.info(`${address.family} ${address.address} ${address.netmask} ${address.mac} ${address.cidr}`);
+                (this.logger || console).info(`${address.family} ${address.address} ${address.netmask} ${address.mac} ${address.cidr}`);
                 RequestManager_1.IPS.add(address.address);
             }
         }
@@ -108,11 +108,11 @@ let RequestManager = RequestManager_1 = class RequestManager {
         var _a;
         const key = this.mapKey(config.key);
         if (this.instances.has(key)) {
-            console.warn(`Instance with key ${key} already exists!`);
+            (this.logger || console).warn(`Instance with key ${key} already exists!`);
             return;
         }
         if (this.queues.has(key)) {
-            console.warn(`Queue with key ${key} already exists!`);
+            (this.logger || console).warn(`Queue with key ${key} already exists!`);
             return;
         }
         if ((_a = config === null || config === void 0 ? void 0 : config.ip) === null || _a === void 0 ? void 0 : _a.bind) {
@@ -129,7 +129,7 @@ let RequestManager = RequestManager_1 = class RequestManager {
             }
         }
         if (config.proxy) {
-            console.info(`Setting up proxy for ${key} via ${config.proxy.host}`);
+            (this.logger || console).info(`Setting up proxy for ${key} via ${config.proxy.host}`);
             config.request.httpsAgent = new https_proxy_agent_1.HttpsProxyAgent(config.proxy);
         }
         if (config.rateLimit) {
@@ -168,11 +168,11 @@ let RequestManager = RequestManager_1 = class RequestManager {
                     endpoint: (_c = error.config) === null || _c === void 0 ? void 0 : _c.url
                 }
             });
-            console.error(`Error in Axios API, status ${(_d = error.response) === null || _d === void 0 ? void 0 : _d.status} ${is429 ? "(429)" : ""}`);
-            console.error((_e = error.config) === null || _e === void 0 ? void 0 : _e.url);
-            console.error(JSON.stringify(((_f = error.response) === null || _f === void 0 ? void 0 : _f.data) || error.response, null, 2));
-            console.error(JSON.stringify((_g = error.response) === null || _g === void 0 ? void 0 : _g.headers, null, 2));
-            console.error(JSON.stringify((_h = error.request) === null || _h === void 0 ? void 0 : _h.data, null, 2));
+            (this.logger || console).error(`Error in Axios API, status ${(_d = error.response) === null || _d === void 0 ? void 0 : _d.status} ${is429 ? "(429)" : ""}`);
+            (this.logger || console).error((_e = error.config) === null || _e === void 0 ? void 0 : _e.url);
+            (this.logger || console).error(JSON.stringify(((_f = error.response) === null || _f === void 0 ? void 0 : _f.data) || error.response, null, 2));
+            (this.logger || console).error(JSON.stringify((_g = error.response) === null || _g === void 0 ? void 0 : _g.headers, null, 2));
+            (this.logger || console).error(JSON.stringify((_h = error.request) === null || _h === void 0 ? void 0 : _h.data, null, 2));
             throw error;
         });
         return instance;
@@ -183,7 +183,7 @@ let RequestManager = RequestManager_1 = class RequestManager {
     }
     setupInstance(key, config, constr = (c) => this.createAxiosInstance(c)) {
         this.instances.set(key, constr(config));
-        console.log("set up axios instance " + key);
+        (this.logger || console).info("set up axios instance " + key);
     }
     /**@deprecated**/
     static setupQueue(key, interval, maxPerRun) {
@@ -193,7 +193,7 @@ let RequestManager = RequestManager_1 = class RequestManager {
         this.queues.set(key, new jobqu_1.JobQueue(request => {
             return this.runAxiosRequest(request, key);
         }, interval, maxPerRun));
-        console.log("set up request queue " + key);
+        (this.logger || console).info("set up request queue " + key);
     }
     /**@deprecated**/
     static async runAxiosRequest(request, inst = RequestManager_1.axiosInstance) {
@@ -214,7 +214,7 @@ let RequestManager = RequestManager_1 = class RequestManager {
             throw new Error("No instance found for key " + inst);
         }
         let breadcrumb = ((_a = request.headers) === null || _a === void 0 ? void 0 : _a["X-MineSkin-Breadcrumb"]) || "00000000";
-        console.log(`${breadcrumb} => ${request.method} ${request.url} via ${instanceKey}`);
+        (this.logger || console).debug(`${breadcrumb} => ${request.method || 'GET'} ${request.url} via ${instanceKey}`);
         return instance.request(request);
     }
     /**@deprecated**/
@@ -233,7 +233,7 @@ let RequestManager = RequestManager_1 = class RequestManager {
             //throw new Error("No queue found for key " + k);
         }
         if (q.size > MAX_QUEUE_SIZE) {
-            console.warn(`${breadcrumb} Rejecting new request as queue for ${k} is full (${q.size})! `);
+            (this.logger || console).warn(`${breadcrumb} Rejecting new request as queue for ${k} is full (${q.size})! `);
             throw new Error("Request queue is full!");
         }
         return await q.add(request);
