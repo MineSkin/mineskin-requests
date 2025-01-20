@@ -161,7 +161,7 @@ export class RequestManager implements IRequestExecutor {
             });
             (this.logger || console).error(`Error in Axios API, status ${ error.response?.status } ${ is429 ? "(429)" : "" }`);
             (this.logger || console).error(error.config?.url);
-            (this.logger || console).error(JSON.stringify(error.response?.data || error.response, null, 2));
+            (this.logger || console).error(JSON.stringify(error.response?.data, null, 2));
             (this.logger || console).error(JSON.stringify(error.response?.headers, null, 2));
             (this.logger || console).error(JSON.stringify(error.request?.data, null, 2));
             throw error;
