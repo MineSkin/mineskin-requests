@@ -173,7 +173,7 @@ let RequestManager = RequestManager_1 = class RequestManager {
             (this.logger || console).error(JSON.stringify((_f = error.response) === null || _f === void 0 ? void 0 : _f.data, null, 2));
             (this.logger || console).error(JSON.stringify((_g = error.response) === null || _g === void 0 ? void 0 : _g.headers, null, 2));
             (this.logger || console).error(JSON.stringify((_h = error.request) === null || _h === void 0 ? void 0 : _h.data, null, 2));
-            throw error;
+            return Promise.reject(error);
         });
         return instance;
     }

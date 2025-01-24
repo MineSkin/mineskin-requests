@@ -164,7 +164,7 @@ export class RequestManager implements IRequestExecutor {
             (this.logger || console).error(JSON.stringify(error.response?.data, null, 2));
             (this.logger || console).error(JSON.stringify(error.response?.headers, null, 2));
             (this.logger || console).error(JSON.stringify(error.request?.data, null, 2));
-            throw error;
+            return Promise.reject(error);
         });
         return instance;
     }
