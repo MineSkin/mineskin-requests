@@ -168,9 +168,9 @@ let RequestManager = RequestManager_1 = class RequestManager {
                     endpoint: (_c = error.config) === null || _c === void 0 ? void 0 : _c.url
                 }
             });
-            (this.logger || console).error(`Error in Axios API, status ${(_d = error.response) === null || _d === void 0 ? void 0 : _d.status} ${is429 ? "(429)" : ""}`);
+            (this.logger || console).error(`${error.name || 'Error'} in Axios API, status ${(_d = error.response) === null || _d === void 0 ? void 0 : _d.status} ${is429 ? "(429)" : ""}`);
             (this.logger || console).error((_e = error.config) === null || _e === void 0 ? void 0 : _e.url);
-            (this.logger || console).error(JSON.stringify(((_f = error.response) === null || _f === void 0 ? void 0 : _f.data) || error.response, null, 2));
+            (this.logger || console).error(JSON.stringify((_f = error.response) === null || _f === void 0 ? void 0 : _f.data, null, 2));
             (this.logger || console).error(JSON.stringify((_g = error.response) === null || _g === void 0 ? void 0 : _g.headers, null, 2));
             (this.logger || console).error(JSON.stringify((_h = error.request) === null || _h === void 0 ? void 0 : _h.data, null, 2));
             throw error;
