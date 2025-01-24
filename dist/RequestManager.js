@@ -169,6 +169,7 @@ let RequestManager = RequestManager_1 = class RequestManager {
                 }
             });
             (this.logger || console).error(`${error.name || 'Error'} ${error.code || ''} in Axios API, status ${(_d = error.response) === null || _d === void 0 ? void 0 : _d.status} ${is429 ? "(429)" : ""}`);
+            (this.logger || console).error(error.message);
             (this.logger || console).error((_e = error.config) === null || _e === void 0 ? void 0 : _e.url);
             (this.logger || console).error(JSON.stringify((_f = error.response) === null || _f === void 0 ? void 0 : _f.data, null, 2));
             (this.logger || console).error(JSON.stringify((_g = error.response) === null || _g === void 0 ? void 0 : _g.headers, null, 2));
