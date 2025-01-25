@@ -793,7 +793,7 @@ __metadata:
 
 "@mineskin/core@git+ssh://git@github.com/MineSkin/mineskin-core.git":
   version: 0.0.0
-  resolution: "@mineskin/core@git+ssh://git@github.com/MineSkin/mineskin-core.git#commit=b0f698fb1c241c31a8784def4d57cab3e0a4fa3e"
+  resolution: "@mineskin/core@git+ssh://git@github.com/MineSkin/mineskin-core.git#commit=41ecdaa99b13de3e6117a9d0002e50d6719e917a"
   dependencies:
     "@sentry/cli": "npm:^2.32.2"
     "@sentry/node": "npm:^8.18.0"
@@ -805,7 +805,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     winston: "npm:^3.14.2"
     winston-daily-rotate-file: "npm:^5.0.0"
-  checksum: 10c0/5bc8d0c66ba8853e817dba7a53226d8fe5c5c24f2f07c2cf295c5151ac65cd4e6163c974ab53df33ab1437f91d10d3c6f8ab02d3262cffafe2bc11c12647c18f
+  checksum: 10c0/087b19608dd10d61ced3d1a03f494ceb2b386b7c0e95b4849dcc28af9284c4bd136e3abef2dd90ce75dfa836b87d505a128776a34b500f801b4ca1efac918918
   languageName: node
   linkType: hard
 
@@ -840,8 +840,8 @@ __metadata:
 
 "@mineskin/types@git+ssh://git@github.com/MineSkin/mineskin-types.git":
   version: 1.0.1
-  resolution: "@mineskin/types@git+ssh://git@github.com/MineSkin/mineskin-types.git#commit=f72590b3d7a16f990ab1e385497f19953aaf156e"
-  checksum: 10c0/37fac421f94cf5564b71a5264f6c463e9ecc9174cb6dcef10f0f8befa4026e99a8fb26c4cf4aad779cf923e85e337ff105e16df1dba0c544df08618aca56c765
+  resolution: "@mineskin/types@git+ssh://git@github.com/MineSkin/mineskin-types.git#commit=26c68c4a2a6338a2e2696485e425159de3ab396e"
+  checksum: 10c0/1f7e22db2049a58d050146f931d415b0088e7b1bdf3a3c4d22d4963dad42a907f5aadb70cf969c0b68c5c9c52fdd74dbeef919b5c42456404059185dca92a6f3
   languageName: node
   linkType: hard
 
