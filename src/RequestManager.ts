@@ -198,30 +198,35 @@ export class RequestManager implements IRequestExecutor {
     }
 
     protected async runAxiosRequest(request: AxiosRequestConfig, inst: AxiosInstance | string = this.defaultInstance): Promise<AxiosResponse> {
-        let instance: AxiosInstance;
-        let instanceKey: string = "default";
-        if (typeof inst === "string") {
-            instance = this.instances.get(inst);
-            instanceKey = inst;
-        } else {
-            instance = inst as AxiosInstance;
-        }
+        return await Sentry.startSpan({
+            op: 'request',
+            name: 'runAxiosRequest'
+        }, async span => {
+            let instance: AxiosInstance;
+            let instanceKey: string = "default";
+            if (typeof inst === "string") {
+                instance = this.instances.get(inst);
+                instanceKey = inst;
+            } else {
+                instance = inst as AxiosInstance;
+            }
 
-        if (!instance) {
-            throw new Error("No instance found for key " + inst);
-        }
+            if (!instance) {
+                throw new Error("No instance found for key " + inst);
+            }
 
-        const start = Date.now();
+            const start = Date.now();
 
-        let breadcrumb = request.headers?.["X-MineSkin-Breadcrumb"] || "00000000";
-        (this.logger || console).debug(`${ breadcrumb } ==> ${ request.method || 'GET' } ${ request.url } via ${ instanceKey }`);
+            let breadcrumb = request.headers?.["X-MineSkin-Breadcrumb"] || "00000000";
+            (this.logger || console).debug(`${ breadcrumb } ==> ${ request.method || 'GET' } ${ request.url } via ${ instanceKey }`);
 
-        const response = await instance.request(request);
-        const end = Date.now();
+            const response = await instance.request(request);
+            const end = Date.now();
 
-        (this.logger || console).debug(`${ breadcrumb } <== ${ request.method || 'GET' } ${ request.url } (${ response.status }) in ${ end - start }ms`);
+            (this.logger || console).debug(`${ breadcrumb } <== ${ request.method || 'GET' } ${ request.url } (${ response.status }) in ${ end - start }ms`);
 
-        return response;
+            return response;
+        });
     }
 
     /**@deprecated**/
@@ -230,27 +235,32 @@ export class RequestManager implements IRequestExecutor {
     }
 
     public async dynamicRequest<K extends RequestKey>(key: K, request: AxiosRequestConfig, breadcrumb?: Breadcrumb): Promise<AxiosResponse> {
-        const k = this.mapKey(key);
-        const q = this.queues.get(k);
+        return await Sentry.startSpan({
+            op: 'request',
+            name: 'dynamicRequest'
+        }, async span => {
+            const k = this.mapKey(key);
+            const q = this.queues.get(k);
 
-        if (breadcrumb) {
-            request.headers = request.headers || {};
-            request.headers["X-MineSkin-Breadcrumb"] = breadcrumb;
-        }
+            if (breadcrumb) {
+                request.headers = request.headers || {};
+                request.headers["X-MineSkin-Breadcrumb"] = breadcrumb;
+            }
 
-        if (!q) {
-            return this.runAxiosRequest(request, k);
-            //throw new Error("No queue found for key " + k);
-        }
+            if (!q) {
+                return this.runAxiosRequest(request, k);
+                //throw new Error("No queue found for key " + k);
+            }
 
-        if (q.size > MAX_QUEUE_SIZE) {
-            (this.logger || console).warn(`${ breadcrumb } Rejecting new request as queue for ${ k } is full (${ q.size })! `);
-            throw new Error("Request queue is full!");
-        }
+            if (q.size > MAX_QUEUE_SIZE) {
+                (this.logger || console).warn(`${ breadcrumb } Rejecting new request as queue for ${ k } is full (${ q.size })! `);
+                throw new Error("Request queue is full!");
+            }
 
-        (this.logger || console).debug(`${ breadcrumb } ... ${ request.method || 'GET' } ${ request.url }`);
+            (this.logger || console).debug(`${ breadcrumb } ... ${ request.method || 'GET' } ${ request.url }`);
 
-        return await q.add(request);
+            return await q.add(request);
+        });
     }
 
 }

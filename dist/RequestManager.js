@@ -201,48 +201,58 @@ let RequestManager = RequestManager_1 = class RequestManager {
         return RequestManager_1.instance.runAxiosRequest(request, inst);
     }
     async runAxiosRequest(request, inst = this.defaultInstance) {
-        var _a;
-        let instance;
-        let instanceKey = "default";
-        if (typeof inst === "string") {
-            instance = this.instances.get(inst);
-            instanceKey = inst;
-        }
-        else {
-            instance = inst;
-        }
-        if (!instance) {
-            throw new Error("No instance found for key " + inst);
-        }
-        const start = Date.now();
-        let breadcrumb = ((_a = request.headers) === null || _a === void 0 ? void 0 : _a["X-MineSkin-Breadcrumb"]) || "00000000";
-        (this.logger || console).debug(`${breadcrumb} ==> ${request.method || 'GET'} ${request.url} via ${instanceKey}`);
-        const response = await instance.request(request);
-        const end = Date.now();
-        (this.logger || console).debug(`${breadcrumb} <== ${request.method || 'GET'} ${request.url} (${response.status}) in ${end - start}ms`);
-        return response;
+        return await Sentry.startSpan({
+            op: 'request',
+            name: 'runAxiosRequest'
+        }, async (span) => {
+            var _a;
+            let instance;
+            let instanceKey = "default";
+            if (typeof inst === "string") {
+                instance = this.instances.get(inst);
+                instanceKey = inst;
+            }
+            else {
+                instance = inst;
+            }
+            if (!instance) {
+                throw new Error("No instance found for key " + inst);
+            }
+            const start = Date.now();
+            let breadcrumb = ((_a = request.headers) === null || _a === void 0 ? void 0 : _a["X-MineSkin-Breadcrumb"]) || "00000000";
+            (this.logger || console).debug(`${breadcrumb} ==> ${request.method || 'GET'} ${request.url} via ${instanceKey}`);
+            const response = await instance.request(request);
+            const end = Date.now();
+            (this.logger || console).debug(`${breadcrumb} <== ${request.method || 'GET'} ${request.url} (${response.status}) in ${end - start}ms`);
+            return response;
+        });
     }
     /**@deprecated**/
     static async dynamicRequest(key, request, breadcrumb) {
         return RequestManager_1.instance.dynamicRequest(key, request, breadcrumb);
     }
     async dynamicRequest(key, request, breadcrumb) {
-        const k = this.mapKey(key);
-        const q = this.queues.get(k);
-        if (breadcrumb) {
-            request.headers = request.headers || {};
-            request.headers["X-MineSkin-Breadcrumb"] = breadcrumb;
-        }
-        if (!q) {
-            return this.runAxiosRequest(request, k);
-            //throw new Error("No queue found for key " + k);
-        }
-        if (q.size > MAX_QUEUE_SIZE) {
-            (this.logger || console).warn(`${breadcrumb} Rejecting new request as queue for ${k} is full (${q.size})! `);
-            throw new Error("Request queue is full!");
-        }
-        (this.logger || console).debug(`${breadcrumb} ... ${request.method || 'GET'} ${request.url}`);
-        return await q.add(request);
+        return await Sentry.startSpan({
+            op: 'request',
+            name: 'dynamicRequest'
+        }, async (span) => {
+            const k = this.mapKey(key);
+            const q = this.queues.get(k);
+            if (breadcrumb) {
+                request.headers = request.headers || {};
+                request.headers["X-MineSkin-Breadcrumb"] = breadcrumb;
+            }
+            if (!q) {
+                return this.runAxiosRequest(request, k);
+                //throw new Error("No queue found for key " + k);
+            }
+            if (q.size > MAX_QUEUE_SIZE) {
+                (this.logger || console).warn(`${breadcrumb} Rejecting new request as queue for ${k} is full (${q.size})! `);
+                throw new Error("Request queue is full!");
+            }
+            (this.logger || console).debug(`${breadcrumb} ... ${request.method || 'GET'} ${request.url}`);
+            return await q.add(request);
+        });
     }
 };
 exports.RequestManager = RequestManager;
