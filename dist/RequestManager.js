@@ -87,11 +87,11 @@ let RequestManager = RequestManager_1 = class RequestManager {
             console.warn("No metrics provider injected!");
         }
         const interfaces = (0, os_1.networkInterfaces)();
-        i: for (let id in interfaces) {
+        for (let id in interfaces) {
             const iface = interfaces[id];
-            a: for (let address of iface) {
+            for (let address of iface) {
                 if (!(0, util_1.isPublicNetworkInterface)(address)) {
-                    continue i; // skip interface
+                    continue;
                 }
                 (this.logger || console).info(`${address.family} ${address.address} ${address.netmask} ${address.mac} ${address.cidr}`);
                 RequestManager_1.IPS.add(address.address);

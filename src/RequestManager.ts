@@ -71,11 +71,11 @@ export class RequestManager implements IRequestExecutor {
         }
 
         const interfaces = networkInterfaces();
-        i: for (let id in interfaces) {
+        for (let id in interfaces) {
             const iface = interfaces[id];
-            a: for (let address of iface) {
+            for (let address of iface) {
                 if (!isPublicNetworkInterface(address)) {
-                    continue i; // skip interface
+                    continue;
                 }
 
                 (this.logger || console).info(`${ address.family } ${ address.address } ${ address.netmask } ${ address.mac } ${ address.cidr }`);
