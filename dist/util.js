@@ -22,6 +22,19 @@ const IPV4_BOGON = [
     '240.0.0.0/4',
     '255.255.255.255/32'
 ];
+const IPV6_BOGON = [
+    '::/128',
+    '::1/128',
+    '::ffff:0:0/96',
+    '::/96',
+    '100::/64',
+    '2001:10::/28',
+    '2001:db8::/32',
+    'fc00::/7',
+    'fe80::/10',
+    'fec0::/10',
+    'ff00::/8'
+];
 function isPublicNetworkInterface(address) {
     if (address.internal) {
         return false;
@@ -60,6 +73,11 @@ function isPublicIPv6(address) {
     }
     if (addr.getScope() !== 'Global') {
         return false;
+    }
+    for (let bogon of IPV6_BOGON) {
+        if (addr.isInSubnet(new ip_address_1.Address6(bogon))) {
+            return false;
+        }
     }
     return true;
 }

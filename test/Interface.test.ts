@@ -33,6 +33,10 @@ describe('Interface', () => {
         test('should match generic', () => {
             expect(isPublicIPv6('2a00:1450:400a:808::200e')).toBeTruthy();
         });
+
+        test('should not match bogon', () => {
+            expect(isPublicIPv6('fd7a:115c:a1f0:ab12:4743:cd96:6165:2f41')).toBeFalsy();
+        });
     })
 
 });
