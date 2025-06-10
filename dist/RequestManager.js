@@ -154,7 +154,7 @@ let RequestManager = RequestManager_1 = class RequestManager {
     }
     createAxiosInstance(config) {
         const instance = axios_1.default.create(config);
-        instance.defaults.headers["User-Agent"] = "MineSkin";
+        instance.defaults.headers["User-Agent"] = `MineSkin/${process.env.MINESKIN_SERVICE || process.env.MINESKIN_GEN_ENV || ''}-${process.env.SOURCE_COMMIT || 'dev'}; +https://docs.mineskin.org`;
         instance.defaults.headers["Content-Type"] = "application/json";
         instance.defaults.headers["Accept"] = "application/json";
         instance.defaults.timeout = TIMEOUT;
