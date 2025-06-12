@@ -824,6 +824,7 @@ __metadata:
     "@types/node": "npm:^20.14.9"
     axios: "npm:^1.7.9"
     axios-rate-limit: "git+ssh://git@github.com/InventivetalentDev/axios-rate-limit.git"
+    axios-retry: "npm:^4.5.0"
     commit-and-tag-version: "npm:^12.4.1"
     dotenv: "npm:^16.4.5"
     https-proxy-agent: "npm:5.0.1"
@@ -2026,6 +2027,17 @@ __metadata:
   peerDependencies:
     axios: "*"
   checksum: 10c0/f45eaa899c2cab248e1937a3ad64740adc8e4ea8d5b91de1c2c59fdefea7e26526bf462ff1406552fe8f269267ca2312e2939a649997122799c30ab784ef25ae
+  languageName: node
+  linkType: hard
+
+"axios-retry@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "axios-retry@npm:4.5.0"
+  dependencies:
+    is-retry-allowed: "npm:^2.2.0"
+  peerDependencies:
+    axios: 0.x || 1.x
+  checksum: 10c0/574e7b1bf24aad99b560042d232a932d51bfaa29b5a6d4612d748ed799a6f11a5afb2582792492c55d95842200cbdfbe3454027a8c1b9a2d3e895d13c3d03c10
   languageName: node
   linkType: hard
 
@@ -3809,6 +3821,13 @@ __metadata:
   version: 1.0.1
   resolution: "is-potential-custom-element-name@npm:1.0.1"
   checksum: 10c0/b73e2f22bc863b0939941d369486d308b43d7aef1f9439705e3582bfccaa4516406865e32c968a35f97a99396dac84e2624e67b0a16b0a15086a785e16ce7db9
+  languageName: node
+  linkType: hard
+
+"is-retry-allowed@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "is-retry-allowed@npm:2.2.0"
+  checksum: 10c0/013be4f8a0a06a49ed1fe495242952e898325d496202a018f6f9fb3fb9ac8fe3b957a9bd62463d68299ae35dbbda680473c85a9bcefca731b49d500d3ccc08ff
   languageName: node
   linkType: hard
 

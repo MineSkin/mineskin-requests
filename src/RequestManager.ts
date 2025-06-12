@@ -13,6 +13,7 @@ import { IRequestExecutor } from "@mineskin/core";
 import { inject, injectable } from "inversify";
 import { ICredentialService, ILogProvider, IMetricsProvider, TYPES as CoreTypes } from "@mineskin/core";
 import winston from "winston";
+import axiosRetry from "axios-retry";
 
 export const GENERIC = "generic";
 
@@ -121,8 +122,17 @@ export class RequestManager implements IRequestExecutor {
             config.request.httpsAgent = new HttpsProxyAgent(config.proxy)
         }
 
-        if (config.rateLimit) {
-            this.setupInstance(key, config.request, c => rateLimit(this.createAxiosInstance(c), config.rateLimit));
+        if (config.rateLimit || config.retry) {
+            this.setupInstance(key, config.request, c => {
+                let instance = this.createAxiosInstance(c);
+                if (config.rateLimit) {
+                    rateLimit(instance, config.rateLimit);
+                }
+                if (config.retry) {
+                    axiosRetry(instance, config.retry);
+                }
+                return instance;
+            });
         } else {
             this.setupInstance(key, config.request);
         }

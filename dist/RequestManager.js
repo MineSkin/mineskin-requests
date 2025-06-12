@@ -51,6 +51,7 @@ const util_1 = require("./util");
 const Sentry = __importStar(require("@sentry/node"));
 const inversify_1 = require("inversify");
 const core_1 = require("@mineskin/core");
+const axios_retry_1 = __importDefault(require("axios-retry"));
 exports.GENERIC = "generic";
 const MAX_QUEUE_SIZE = 100;
 const TIMEOUT = 10000;
@@ -132,8 +133,17 @@ let RequestManager = RequestManager_1 = class RequestManager {
             (this.logger || console).info(`Setting up proxy for ${key} via ${config.proxy.host}`);
             config.request.httpsAgent = new https_proxy_agent_1.HttpsProxyAgent(config.proxy);
         }
-        if (config.rateLimit) {
-            this.setupInstance(key, config.request, c => (0, axios_rate_limit_1.default)(this.createAxiosInstance(c), config.rateLimit));
+        if (config.rateLimit || config.retry) {
+            this.setupInstance(key, config.request, c => {
+                let instance = this.createAxiosInstance(c);
+                if (config.rateLimit) {
+                    (0, axios_rate_limit_1.default)(instance, config.rateLimit);
+                }
+                if (config.retry) {
+                    (0, axios_retry_1.default)(instance, config.retry);
+                }
+                return instance;
+            });
         }
         else {
             this.setupInstance(key, config.request);
