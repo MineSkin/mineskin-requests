@@ -28,7 +28,7 @@
     "@sentry/cli": "^2.32.2",
     "@sentry/node": "^8.18.0",
     "@sentry/profiling-node": "^8.18.0",
-    "axios": "^1.7.9",
+    "axios": "^1.9.0",
     "axios-rate-limit": "git+ssh://git@github.com/InventivetalentDev/axios-rate-limit.git",
     "axios-retry": "^4.5.0",
     "dotenv": "^16.4.5",
