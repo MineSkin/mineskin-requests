@@ -215,7 +215,7 @@ let RequestManager = RequestManager_1 = class RequestManager {
             op: 'request',
             name: 'runAxiosRequest'
         }, async (span) => {
-            var _a;
+            var _a, _b, _c;
             let instance;
             let instanceKey = "default";
             if (typeof inst === "string") {
@@ -229,10 +229,16 @@ let RequestManager = RequestManager_1 = class RequestManager {
                 throw new Error("No instance found for key " + inst);
             }
             const start = Date.now();
-            let breadcrumb = ((_a = request.headers) === null || _a === void 0 ? void 0 : _a["X-MineSkin-Breadcrumb"]) || "00000000";
+            if ((_a = request === null || request === void 0 ? void 0 : request.meta) === null || _a === void 0 ? void 0 : _a.timing) {
+                request.meta.timing.start = start;
+            }
+            let breadcrumb = ((_b = request.headers) === null || _b === void 0 ? void 0 : _b["X-MineSkin-Breadcrumb"]) || "00000000";
             (this.logger || console).debug(`${breadcrumb} ==> ${request.method || 'GET'} ${request.url} via ${instanceKey}`);
             const response = await instance.request(request);
             const end = Date.now();
+            if ((_c = request === null || request === void 0 ? void 0 : request.meta) === null || _c === void 0 ? void 0 : _c.timing) {
+                request.meta.timing.finish = end;
+            }
             (this.logger || console).debug(`${breadcrumb} <== ${request.method || 'GET'} ${request.url} (${response.status}) in ${end - start}ms`);
             return response;
         });
@@ -246,9 +252,18 @@ let RequestManager = RequestManager_1 = class RequestManager {
             op: 'request',
             name: 'dynamicRequest'
         }, async (span) => {
+            var _a;
             const k = this.mapKey(key);
             const q = this.queues.get(k);
+            if (!request.meta) {
+                request.meta = {
+                    timing: {
+                        init: Date.now()
+                    }
+                };
+            }
             if (breadcrumb) {
+                request.meta.breadcrumb = breadcrumb;
                 request.headers = request.headers || {};
                 request.headers["X-MineSkin-Breadcrumb"] = breadcrumb;
             }
@@ -261,6 +276,9 @@ let RequestManager = RequestManager_1 = class RequestManager {
                 throw new Error("Request queue is full!");
             }
             (this.logger || console).debug(`${breadcrumb} ... ${request.method || 'GET'} ${request.url}`);
+            if ((_a = request.meta) === null || _a === void 0 ? void 0 : _a.timing) {
+                request.meta.timing.queued = Date.now();
+            }
             return await q.add(request);
         });
     }

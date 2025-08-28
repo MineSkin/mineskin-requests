@@ -1,0 +1,1 @@
+{"version":3,"file":"types.js","sourceRoot":"/","sources":["types.ts"],"names":[],"mappings":"","sourcesContent":["import { AxiosRequestConfig } from \"axios\";\n\nexport interface MineSkinAxiosRequestConfig<T = unknown> extends AxiosRequestConfig<T> {\n    meta?: {\n        breadcrumb?: string;\n        timing?: Record<string, number>;\n    };\n}"]}

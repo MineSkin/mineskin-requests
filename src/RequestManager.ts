@@ -14,6 +14,7 @@ import { inject, injectable } from "inversify";
 import { ICredentialService, ILogProvider, IMetricsProvider, TYPES as CoreTypes } from "@mineskin/core";
 import winston from "winston";
 import axiosRetry from "axios-retry";
+import { MineSkinAxiosRequestConfig } from "./types";
 
 export const GENERIC = "generic";
 
@@ -33,7 +34,7 @@ export class RequestManager implements IRequestExecutor {
     }
 
     protected readonly instances: Map<string, AxiosInstance> = new Map<string, AxiosInstance>();
-    protected readonly queues: Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>> = new Map<string, JobQueue<AxiosRequestConfig, AxiosResponse>>();
+    protected readonly queues: Map<string, JobQueue<MineSkinAxiosRequestConfig, AxiosResponse>> = new Map<string, JobQueue<MineSkinAxiosRequestConfig, AxiosResponse>>();
 
     private static _instance: RequestManager;
 
@@ -181,11 +182,11 @@ export class RequestManager implements IRequestExecutor {
     }
 
     /**@deprecated**/
-    protected static setupInstance(key: string, config: AxiosRequestConfig, constr: AxiosConstructor = (c) => RequestManager.createAxiosInstance(c)) {
+    protected static setupInstance(key: string, config: MineSkinAxiosRequestConfig, constr: AxiosConstructor = (c) => RequestManager.createAxiosInstance(c)) {
         return RequestManager.instance.setupInstance(key, config, constr);
     }
 
-    protected setupInstance(key: string, config: AxiosRequestConfig, constr: AxiosConstructor = (c) => this.createAxiosInstance(c)) {
+    protected setupInstance(key: string, config: MineSkinAxiosRequestConfig, constr: AxiosConstructor = (c) => this.createAxiosInstance(c)) {
         this.instances.set(key, constr(config));
         (this.logger || console).info("set up axios instance " + key);
     }
@@ -196,18 +197,18 @@ export class RequestManager implements IRequestExecutor {
     }
 
     protected setupQueue(key: string, interval: number, maxPerRun: number): void {
-        this.queues.set(key, new JobQueue<AxiosRequestConfig, AxiosResponse>(request => {
+        this.queues.set(key, new JobQueue<MineSkinAxiosRequestConfig, AxiosResponse>(request => {
             return this.runAxiosRequest(request, key);
         }, interval, maxPerRun));
         (this.logger || console).info("set up request queue " + key);
     }
 
     /**@deprecated**/
-    protected static async runAxiosRequest(request: AxiosRequestConfig, inst: AxiosInstance | string = RequestManager.axiosInstance): Promise<AxiosResponse> {
+    protected static async runAxiosRequest(request: MineSkinAxiosRequestConfig, inst: AxiosInstance | string = RequestManager.axiosInstance): Promise<AxiosResponse> {
         return RequestManager.instance.runAxiosRequest(request, inst);
     }
 
-    protected async runAxiosRequest(request: AxiosRequestConfig, inst: AxiosInstance | string = this.defaultInstance): Promise<AxiosResponse> {
+    protected async runAxiosRequest(request: MineSkinAxiosRequestConfig, inst: AxiosInstance | string = this.defaultInstance): Promise<AxiosResponse> {
         return await Sentry.startSpan({
             op: 'request',
             name: 'runAxiosRequest'
@@ -226,12 +227,18 @@ export class RequestManager implements IRequestExecutor {
             }
 
             const start = Date.now();
+            if (request?.meta?.timing) {
+                request.meta.timing.start = start;
+            }
 
             let breadcrumb = request.headers?.["X-MineSkin-Breadcrumb"] || "00000000";
             (this.logger || console).debug(`${ breadcrumb } ==> ${ request.method || 'GET' } ${ request.url } via ${ instanceKey }`);
 
             const response = await instance.request(request);
             const end = Date.now();
+            if (request?.meta?.timing) {
+                request.meta.timing.finish = end;
+            }
 
             (this.logger || console).debug(`${ breadcrumb } <== ${ request.method || 'GET' } ${ request.url } (${ response.status }) in ${ end - start }ms`);
 
@@ -240,11 +247,11 @@ export class RequestManager implements IRequestExecutor {
     }
 
     /**@deprecated**/
-    public static async dynamicRequest<K extends RequestKey>(key: K, request: AxiosRequestConfig, breadcrumb?: Breadcrumb): Promise<AxiosResponse> {
+    public static async dynamicRequest<K extends RequestKey>(key: K, request: MineSkinAxiosRequestConfig, breadcrumb?: Breadcrumb): Promise<AxiosResponse> {
         return RequestManager.instance.dynamicRequest(key, request, breadcrumb);
     }
 
-    public async dynamicRequest<K extends RequestKey>(key: K, request: AxiosRequestConfig, breadcrumb?: Breadcrumb): Promise<AxiosResponse> {
+    public async dynamicRequest<K extends RequestKey>(key: K, request: MineSkinAxiosRequestConfig, breadcrumb?: Breadcrumb): Promise<AxiosResponse> {
         return await Sentry.startSpan({
             op: 'request',
             name: 'dynamicRequest'
@@ -252,7 +259,16 @@ export class RequestManager implements IRequestExecutor {
             const k = this.mapKey(key);
             const q = this.queues.get(k);
 
+            if (!request.meta) {
+                request.meta = {
+                    timing: {
+                        init: Date.now()
+                    }
+                };
+            }
+
             if (breadcrumb) {
+                request.meta.breadcrumb = breadcrumb;
                 request.headers = request.headers || {};
                 request.headers["X-MineSkin-Breadcrumb"] = breadcrumb;
             }
@@ -269,10 +285,13 @@ export class RequestManager implements IRequestExecutor {
 
             (this.logger || console).debug(`${ breadcrumb } ... ${ request.method || 'GET' } ${ request.url }`);
 
+            if (request.meta?.timing) {
+                request.meta.timing.queued = Date.now();
+            }
             return await q.add(request);
         });
     }
 
 }
 
-type AxiosConstructor = (config: AxiosRequestConfig) => AxiosInstance;
+type AxiosConstructor = (config: MineSkinAxiosRequestConfig) => AxiosInstance;
